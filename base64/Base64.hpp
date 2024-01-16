@@ -12,10 +12,11 @@
 #include "MyUtil.hpp"
 
 struct Base64 {
+    // ref: https://en.wikipedia.org/wiki/Base64
+    
     static char toChar(uint8_t v) {
         // from base64 val to char
         // ref: https://www.ascii-code.com/
-        // ref: https://en.wikipedia.org/wiki/Base64
         
         if (v <  26) { return v + 'A'; } // A - Z
         if (v <  52) { return v + 71 ; } // a - z
@@ -29,7 +30,43 @@ struct Base64 {
     static void decode(std::vector<uint8_t>& o, uint8_t* src, size_t srcLen) {
         if (!src) return;
         o.clear();
-        // TODO: decode
+        // TODO: test it
+        auto p = src;
+        auto e = src + srcLen;
+        while (p < e) {
+            
+            char c1 = *p; p++;
+            char c2 = *p; p++;
+            
+            char c3 = *p; p++;
+            
+            if (c3 == '=' && p < e) {
+                // 2 pd
+                uint8_t b1 = ((c1 & 0x3F) << 2) | ((c2 & 0x30) >> 4);
+                o.push_back(b1);
+                return;
+            }
+            
+            char c4 = *p; p++;
+   
+            if (c4 == '=' && p == e) {
+                //1 pd
+                uint8_t b1 = ((c1 & 0x3F) << 2) | ((c2 & 0x30) >> 4);
+                uint8_t b2 = ((c2 & 0x0F) << 4) | ((c3 & 0xF0) >> 4);
+                o.push_back(b1);
+                o.push_back(b2);
+                return;
+            }
+            
+            uint8_t b1 = ((c1 & 0x3F) << 2) | ((c2 & 0x30) >> 4);
+            uint8_t b2 = ((c2 & 0x0F) << 4) | ((c3 & 0xF0) >> 4);
+            uint8_t b3 = ((c3 & 0x03) << 6) | ((c4 & 0x3F)     );
+            
+            o.push_back(b1);
+            o.push_back(b2);
+            o.push_back(b3);
+        }
+
     }
     
     static void encode(std::string& o, uint8_t* src, size_t srcLen) {
