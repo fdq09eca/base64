@@ -49,7 +49,7 @@ struct MyUtil {
         size_t totalBit = sizeof(T);
         
         for (auto i = 0; i < totalBit; i ++) {
-            n += o & 0x1;
+            n += o & 0x01;
             o = o >> 1;
         }
         
